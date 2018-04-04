@@ -22,7 +22,7 @@ name                     : "Your Name"
 description              : "An amazing website."
 url                      : # the base hostname & protocol for your site e.g. "https://mmistakes.github.io"
 baseurl                  : # the subpath of your site, e.g. "/blog"
-repository               : # GitHub username/repo-name e.g. "mmistakes/minimal-mistakes"
+repository               : peytondmurray/peytondmurray.github.io # GitHub username/repo-name e.g. "mmistakes/minimal-mistakes"
 teaser                   : # path of fallback teaser image, e.g. "/assets/images/500x300.png"
 # breadcrumbs            : false # true, false (default)
 words_per_minute         : 200
@@ -75,7 +75,7 @@ naver_site_verification  :
 
 # Social Sharing
 twitter:
-  username               :
+  username               : peytondmurray
 facebook:
   username               :
   app_id                 :
@@ -90,18 +90,18 @@ social:
 
 # Analytics
 analytics:
-  provider               : false # false (default), "google", "google-universal", "custom"
+  provider               : "false" # false (default), "google", "google-universal", "custom"
   google:
     tracking_id          :
 
 
 # Site Author
 author:
-  name             : "Your Name"
-  avatar           : # path of avatar image, e.g. "/assets/images/bio-photo.jpg"
-  bio              : "I am an amazing person."
-  location         : "Somewhere"
-  email            :
+  name             : "Peyton Murray"
+  avatar           : "/assets/images/bio-phot.png" # path of avatar image, e.g. "/assets/images/bio-photo.jpg"
+  bio              : "Graduate student at UC Davis and sometimes programmer."
+  location         : "Davis, CA"
+  email            : peynmurray@gmail.com
   uri              :
   home             : # null (default), "absolute or relative url to link to author home"
   bitbucket        :
@@ -110,7 +110,7 @@ author:
   flickr           :
   facebook         :
   foursquare       :
-  github           :
+  github           : peytondmurray
   gitlab           :
   google_plus      :
   keybase          :
@@ -119,14 +119,17 @@ author:
   linkedin         : # "john-doe-12345678" (the last part of your profile url, e.g. https://www.linkedin.com/in/john-doe-12345678)
   pinterest        :
   soundcloud       :
-  stackoverflow    : # "123456/username" (the last part of your profile url, e.g. https://stackoverflow.com/users/123456/username)
+  stackoverflow    : 9435195/peytondmurray # "123456/username" (the last part of your profile url, e.g. https://stackoverflow.com/users/123456/username)
   steam            : # "steamId" (the last part of your profile url, e.g. https://steamcommunity.com/id/steamId/)
   tumblr           :
-  twitter          :
+  twitter          : peytondmurray
   vine             :
   weibo            :
   xing             :
   youtube          : # "https://youtube.com/c/MichaelRoseDesign"
+  orcid            : "0000-0003-0389-0611"
+  google_scholar   : "https://scholar.google.ca/citations?user=NXE8TDYAAAAJ&hl=en&oi=ao"
+  mendeley         : "peyton-murray"
 
 
 # Reading Files
@@ -261,8 +264,18 @@ defaults:
       type: posts
     values:
       layout: single
+      classes: wide
       author_profile: true
       read_time: true
       comments: # true
       share: true
       related: true
+  - scope:
+      path: ""
+      type: pages
+    values:
+      layout: single
+      classes: wide
+      author_profile: true
+      read_time: false
+      share: true
