@@ -13,6 +13,9 @@ Structures confined to nanometer length scales in one or more dimensions can pos
 ![forc]
 Magnetic materials are widely used in consumer products, industry, and in research applications. Utilizing these materials in device applications requires an understanding of their behavior from the macroscopic level all the way down to atomic length scales. Alongside micromagnetic simulations ([OOMMF][oommf], [Mumax3][mumax]), one of the major tools I have used to understand hysteretic behavior is the First Order Reversal Curve (FORC) technique. While simple major loop measurements can yield information about the average magnetization of an ensemble of magnetic moments, FORC analysis allows individual switching events to be probed, revealing details about iteractions between magnetic moments.
 
+## Magneto-ionics
+![nickel-oxide]
+
 ## Chiral Magnetism
 ![skyrmion]
 
@@ -20,9 +23,12 @@ Magnetic materials are widely used in consumer products, industry, and in resear
 [oommf]: http://math.nist.gov/oommf/
 [mumax]: http://mumax.github.io/
 
+[nickel-oxide]: {{ site.url }}{{ site.baseurl }}/assets/images/NiCoO_r1_little.jpg
+{:.align-right}
 [particles]: {{ site.url }}{{ site.baseurl }}/assets/images/particles-300x240px.png
 {: .align-left}
 [forc]: {{ site.url }}{{ site.baseurl }}/assets/images/forc.jpg
 {: .align-center}
 [skyrmion]: {{ site.url }}{{ site.baseurl }}/assets/images/skyrmion.png
 {:.align-right}
+
