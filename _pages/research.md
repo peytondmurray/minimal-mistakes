@@ -11,10 +11,11 @@ Structures confined to nanometer length scales in one or more dimensions can pos
 
 ## Magnetic Materials and Hysteresis
 ![forc]
-Magnetic materials are widely used in consumer products, industry, and in research applications. Utilizing these materials in device applications requires an understanding of their behavior from the macroscopic level all the way down to atomic length scales. Alongside micromagnetic simulations ([OOMMF][oommf], [Mumax3][mumax]), one of the major tools I have used to understand hysteretic behavior is the First Order Reversal Curve (FORC) technique. While simple major loop measurements can yield information about the average magnetization of an ensemble of magnetic moments, FORC analysis allows individual switching events to be probed, revealing details about iteractions between magnetic moments.
+Magnetic materials are widely used in consumer products, industry, and in research applications. Utilizing these materials in device applications requires an understanding of their behavior from the macroscopic level all the way down to atomic length scales. Alongside micromagnetic simulations ([OOMMF][oommf], [Mumax3][mumax]), one of the major tools I have used to understand hysteretic behavior is the First Order Reversal Curve (FORC) technique. While simple major loop measurements can yield information about the average magnetization of an ensemble of magnetic moments, FORC analysis allows individual switching events to be probed, revealing microscopic details about iteractions between magnetic moments.
 
-## Magneto-ionics
+## Magnetoionics
 ![nickel-oxide]
+Conventional logic and memory technologies which rely on electric currents suffer from Joule heating, limiting their energy efficiency, and are volatile, which requires devices to remain powered in order to maintain their state. The ability to control magnetic materials with electric fields should enable a new generation of nonvolatile memory devices that do not require electric currents, circumventing this limitation. One promising approach towards electric field control of magnetism has focused on solid-state manipulation of ion distributions. My work has focused on the development of methods for chemically-induced and electric-field-induced ionic motion.
 
 ## Chiral Magnetism
 ![skyrmion]
