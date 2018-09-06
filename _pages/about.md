@@ -14,4 +14,4 @@ My name is Peyton Murray. I'm a graduate student working on my PhD in physics at
 
 [research]: /research/
 [coding]: /coding/
-[CV]: /assets/CV_Peyton_Murray_2018-08-21.pdf
+[CV]: /assets/CV_Peyton_Murray_2018-09-06.pdf
