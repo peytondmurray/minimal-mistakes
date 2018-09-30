@@ -30,6 +30,6 @@ Conventional logic and memory technologies which rely on electric currents suffe
 {: .align-left}
 [forc]: {{ site.url }}{{ site.baseurl }}/assets/images/forc.jpg
 {: .align-center}
-[skyrmion]: {{ site.url }}{{ site.baseurl }}/assets/images/skyrmion.png
+[skyrmion]: {{ site.url }}{{ site.baseurl }}/assets/images/skyrmion.jpg
 {:.align-right}
 
