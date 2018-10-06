@@ -99,7 +99,7 @@ analytics:
 author:
   name             : "Peyton Murray"
   avatar           : "/assets/images/bio-phot.png" # path of avatar image, e.g. "/assets/images/bio-photo.jpg"
-  bio              : "Graduate student at UC Davis and sometimes programmer."
+  bio              : "Graduate student at UC Davis."
   location         : "Davis, CA"
   email            : peynmurray@gmail.com
   uri              :

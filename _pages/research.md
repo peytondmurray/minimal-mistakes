@@ -19,7 +19,7 @@ Conventional logic and memory technologies which rely on electric currents suffe
 
 ## Chiral Magnetism
 ![skyrmion]
-
+In certain bulk materials or thin film systems, competing magnetic interactions can lead to winding magnetization textures known as skyrmions. These particle-like textures resemble magnetic vortices, and have extraordinary properties which make them of particular interest both for fundamental physics as well as for nonvolatile, ultra-fast, and low-dissipation storage and logic applications. Recently, I have carried out resistivity measurements in search of Hall effect signatures of skyrmions in novel artificial skyrmion lattices.
 
 [oommf]: http://math.nist.gov/oommf/
 [mumax]: http://mumax.github.io/
