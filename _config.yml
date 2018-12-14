@@ -99,8 +99,8 @@ analytics:
 author:
   name             : "Peyton Murray"
   avatar           : "/assets/images/bio-phot.png" # path of avatar image, e.g. "/assets/images/bio-photo.jpg"
-  bio              : "Graduate student at UC Davis."
-  location         : "Davis, CA"
+  bio              : "Postdoctoral Researcher at the University of Tampere."
+  location         : "Tampere, Finland"
   email            : peynmurray@gmail.com
   uri              :
   home             : # null (default), "absolute or relative url to link to author home"

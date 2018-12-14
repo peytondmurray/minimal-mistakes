@@ -5,11 +5,10 @@ title: "About"
 #toc: true
 ---
 
-My name is Peyton Murray. I'm a graduate student working on my PhD in physics at the University of California, Davis, under my advisor, [Kai Liu][kai]. I spend a lot of time in the lab working on my [research][research], but in my free time I like to write [software][coding] for science.
+My name is Peyton Murray. I'm a postdoctoral researcher at the University of Tampere working on computational methods for understanding nanoscale magnetism. I spend a lot of time working on my [research][research], but in my free time I like to write [software][coding] for science.
 
 [Here's my CV.][CV]
 
 [research]: /research/
 [coding]: /coding/
-[kai]: http://liu.physics.ucdavis.edu
-[CV]: /assets/CV_Peyton_Murray_2018-10-05.pdf
+[CV]: /assets/CV_Peyton_Murray.pdf
