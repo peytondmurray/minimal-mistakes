@@ -99,7 +99,7 @@ analytics:
 author:
   name             : "Peyton Murray"
   avatar           : "/assets/images/bio-phot.png" # path of avatar image, e.g. "/assets/images/bio-photo.jpg"
-  bio              : "Postdoctoral Researcher at the University of Tampere."
+  bio              : "Postdoctoral Researcher at Tampere University."
   location         : "Tampere, Finland"
   email            : peynmurray@gmail.com
   uri              :
