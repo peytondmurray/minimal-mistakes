@@ -1,39 +1,7 @@
 <!--
   <li>
-    <a href="http://link-to-whatever-social-network.com/user/" itemprop="sameAs">
+    <a href="http://link-to-whatever-social-network.com/user/" itemprop="sameAs" rel="nofollow noopener noreferrer">
       <i class="fas fa-fw" aria-hidden="true"></i> Custom Social Profile Link
     </a>
   </li>
 -->
-
-{% if author.orcid %}
-    <li>
-        <a href="https://orcid.org/{{ author.orcid }}" itemprop="sameAs">
-            <i class="ai ai-orcid-square ai-fw" aria-hidden="true"></i> ORCID
-        </a>
-    </li>
-{% endif %}
-
-{% if author.google_scholar %}
-    <li>
-        <a href="{{ author.google_scholar }}" itemprop="sameAs">
-            <i class="ai ai-google-scholar-square ai-fw" aria-hidden="true"></i> Google Scholar
-        </a>
-    </li>
-{% endif %}
-
-{% if author.mendeley %}
-    <li>
-        <a href="https://www.mendeley.com/profiles/{{ author.mendeley }}" itemprop="sameAs">
-            <i class="ai ai-mendeley-square ai-fw" aria-hidden="true"></i> Mendeley
-        </a>
-    </li>
-{% endif %}
-
-{% if author.researchgate %}
-    <li>
-        <a href="https://www.researchgate.net/profile/{{ author.researchgate }}" itemprop="sameAs">
-            <i class="ai ai-researchgate-square ai-fw" aria-hidden="true"></i> ResearchGate
-        </a>
-    </li>
-{% endif %}
