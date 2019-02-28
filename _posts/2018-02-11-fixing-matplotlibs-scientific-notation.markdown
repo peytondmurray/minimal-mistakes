@@ -38,7 +38,7 @@ upperAxes.set_ylabel("y")
 plt.savefig("example.svg")
 {% endhighlight %}
 
-This code producese the following:
+This code produces the following:
 
 ![bad_exponent]
 

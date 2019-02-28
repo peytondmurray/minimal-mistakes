@@ -4,20 +4,17 @@ layout: single
 author_profile: true
 read_time: true
 share: true
-date: '2019-02-30 14:30:00 -0800'
+date: '2019-02-26 14:30:00 -0800'
 categories: coding
 toc: true
 ---
-
 
 # Introduction
 
 About a year ago, I was working on a for-fun problem where I needed to determine the voltage from an arbitrary charge distribution along 1 dimension. This is the problem of solving a linear differential equation, in this case, Poisson's equation, given a driving function $$F$$:
 
 $$
-\begin{equation}
 \nabla^2 v = F\label{eq:one}
-\end{equation}
 $$
 
 Unless we're involved in developing these sorts of libraries regularly, it's not too often that we think about how these problems can be solved numerically, with the fact there aren't very many blog posts about this kind of stuff a good testament to how infrequently we think about these sorts of algorithms (It's also just hard to write this kind of material without it being mind-numbingly dry. Hopefully this will be an interesting overview without getting too bogged down).
@@ -26,13 +23,45 @@ Before I get into it, I should also mention that there are a number of different
 
 # Defining the Problem
 
-I have a grid of equally spaced points with a charge distribution $$\rho$$ defined at each point. The goal is to find the voltage $v$ everywhere, where the voltage is governed by Poisson's equation, mentioned above. In the usual form it is found in an electromagnetism textbook,
+I have a grid of equally spaced points with a charge distribution $$\rho$$ defined at each point:
+
+![problem_layout]
+
+and so on. The goal is to find the voltage $v$ everywhere, where the voltage is governed by Poisson's equation, mentioned above. The context of electromagnetism (where it's most commonly encountered) it is written
 
 $$
-\begin{equation}
 \nabla^2 v = -\frac{\rho}{\epsilon}
-\end{equation}
+\label{eq:ref1}
 $$
 
-but for our purposes, I'm just going to use $F=-\frac{\rho}{\epsilon}$.
+but for our purposes, I'm just going to use $F\equiv-\frac{\rho}{\epsilon}$. Since we're interested in solving for the value of $v$ on a set of discrete points, the first step in tackling the problem is to change the laplacian, which acts on a _continuous_ scalar field, into a _discrete_ operator. Using central finite differences scheme, a derivative can be approximated by
 
+$$
+\frac{\mathrm{d}v}{\mathrm{d}x} \approx \frac{v(x+\frac{1}{2}\Delta x) - v(x-\frac{1}{2}\Delta x)}{\Delta x}
+$$
+
+The 1D laplacian can then be found pretty easily by applying this definition twice:
+
+$$
+\nabla^2 v = \frac{\mathrm{d}}{\mathrm{d}x} \frac{\mathrm{d}v}{\mathrm{d}x} \approx \frac{\frac{\mathrm{d}v}{\mathrm{d}x}(x+\frac{1}{2}\Delta x) - \frac{\mathrm{d}v}{\mathrm{d}x}(x-\frac{1}{2}\Delta x)}{\Delta x} = \frac{v(x+\Delta x) - 2v(x) + v(x-\Delta x)}{\Delta x^2}
+$$
+
+Since it's annoying to write $v(x+\Delta x)$ everywhere, I'm just going to use the notation that $v_i$ for the value of the voltage at $x_i$, which means that $v(x+\Delta x) \rightarrow v_{i+1}$, etc. Now the discrete laplacian is just
+
+$$
+\nabla^2 v \,\,\rightarrow\,\, \frac{v_{i+1} - 2v_i + v_{i-1}}{\Delta x^2}
+$$
+
+Rewriting this in terms of matrices allows us to reduce the amount of notation even further, making $\ref{eq:ref1}$:
+
+$$
+\begin{pmatrix} 1 & -2 & 1 & \, & \, & \, & \, & \, \\ & \, 1 & -2 & 1 & \, & \, & \, & \, \\ \, & \, & \, & \, & \ddots \, & \, & \, & \\ \, & \, & \, & \, & \, & 1 & -2 & 1 \end{pmatrix}
+\begin{pmatrix} v_1 \\ v_2 \\ \vdots \\ v_{n-1} \end{pmatrix}
+= \begin{pmatrix} F_1 \\ F_2 \\ \vdots \\ F_{n-1} \end{pmatrix}
+$$
+
+
+# Jacobi Iteration
+
+[problem_layout]: /assets/images/multigrid/problem_layout.png
+{: .align-center}

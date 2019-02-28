@@ -295,11 +295,12 @@ defaults:
       type: posts
     values:
       layout: single
+      classes: wide
       author_profile: true
       read_time: true
       comments: # true
       share: true
-      related: true
+      related: false
   - scope:
       path: ""
       type: pages
