@@ -9,6 +9,10 @@ categories: coding
 toc: true
 ---
 
+# Note
+
+This is a work in progress. It's going to take a few days to write everything out and get it looking nice. I'll remove this note when I'm done.
+
 # Introduction
 
 About a year ago, I was working on a for-fun problem where I needed to determine the voltage from an arbitrary charge distribution along 1 dimension. This is the problem of solving a linear differential equation, in this case, Poisson's equation, given a driving function $$F$$:
