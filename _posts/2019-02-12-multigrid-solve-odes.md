@@ -97,8 +97,10 @@ $$
 In this scheme, we start by making an initial guess $V^0_i$ at the solution, and plugging this into the right hand side to get the first iterative improvement $v^1_i$. We then plug that back in to the right hand side, and calculate again to improve that solution iteratively. This works because the improved solution $v^1_i$ is found from the values of the neighboring points at the last iteration:
 
 $$
+\begin{align}
 v^1_i = D^{-1}Qv^0_i + D^{-1}f = \frac{1}{2}(v^0_{i-1} + v^0_{i+1} + f_i)
 \label{eq:ref4}
+\end{align}
 $$
 
 This is pretty good, because now the problem is just turning the crank as fast as the computer will go. But there's actually a neat trick which will speed up how fast this solution converges: instead of using the RHS of $\ref{eq:ref3}$ as the improved solution, we can treat it as an intermediate value: $v^* = D^{-1}Qv^0_i + D^{-1}f$. We then mix $v^*$ with part of the original solution to get the next iteration,
@@ -107,24 +109,35 @@ $$
 v^1_i = wv^*_i + (1-w)v^0_i
 $$
 
-where $w$ is a constant less than $1$. This is the *weighted Jacobi method*, and it's faster than standard Jacobi iteration. When $w=1$, you can see that the original Jacobi iteration is recovered.
+where $w$ is a constant less than $1$. This is the *weighted Jacobi method*, and it's faster than standard Jacobi iteration. When $w=1$, the original Jacobi iteration is recovered.
 
+<video autoplay="autoplay" loop="loop" width="1024" height="480">
+  <source src="/assets/images/multigrid/jacobi.mp4" type="video/mp4">
+</video>
 
-![jacobi_example]
-
-
+On the left side is the actual value of $f$ plotted as a function of $x$ in blue, with $Av$ shown in black. On the right is the $v$ plotted as a function of $x$. The initial guess $v^0$ is just zero, but with each iteration it gets more rounded, and $Av$ converges toward $f$ (the difference $f-Av$ is called the _error_, but we'll get to that later).
 
 Things get [a little more complicated](#appendix-dirichlet-boundary-conditions) if you want to find out what happens if we apply some voltage at the boundary, but I've left the details in the extra section at the bottom, an the math that follows still applies.
 
 # Why Is This So Slow???
 
-Going back to $\ref{eq:ref4}$ you can see that at each iteration, the value of $v_i$ is only modified by neighboring points. It therefore takes a lot of iterations for values of $v$ on one end of the lattice to have any effect on the other end. This makes the Jacobi method great for relaxing initial guesses like this:
+Going back to $\ref{eq:ref4}$ you can see that at each iteration, the value of $v_i$ can only be affected by neighboring points. It therefore takes a lot of iterations for values of $v$ on one end of the lattice to have any effect on the other end. This makes the Jacobi method great for relaxing initial guesses like this:
 
-![high_freq]
+<video autoplay="autoplay" loop="loop" width="1024" height="480">
+  <source src="/assets/images/multigrid/jacobi_highfreq.mp4" type="video/mp4">
+</video>
 
-but terrible for intial guesses like this:
+See how quickly it suppresses the high frequency components of the initial guess? After only a few iterations $v$ is relaxed into a more sensible form, but it takes a _lot_ more iterations to actually get it close to the real solution. On the other hand, it's pretty terrible for intial guesses like this:
 
-![low_freq]
+<video autoplay="autoplay" loop="loop" width="1024" height="480">
+  <source src="/assets/images/multigrid/jacobi_lowfreq.mp4" type="video/mp4">
+</video>
+
+which only have low frequencies; it just takes too many iterations for it to get smoothed out and converge. This is the most important thing to realize about the Jacobi method: it's only good at smoothing out trial solutions which have high frequencies - it's useless at anything else.
+
+# Multigrid
+
+
 
 # Appendix: Dirichlet Boundary Conditions
 
@@ -137,9 +150,5 @@ v_{n-2} - 2v_{n-1} + v_n = F_{n-1} \,\,\,\, &\rightarrow \,\,\,\, F_{n-1} - v_{n
 \end{align}
 $$
 
-[problem_layout]: /assets/images/multigrid/problem_layout.png
-[jacobi_exaple]: /assets/images/multigrid/jacobi_example.png
-[high_freq]: /assets/images/multigrid/jacobi_high_freq.png
-[low_freq]: /assets/images/multigrid/jacobi_low_freq.png
 
 {: .align-center}
