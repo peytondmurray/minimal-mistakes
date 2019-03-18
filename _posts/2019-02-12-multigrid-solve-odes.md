@@ -157,5 +157,6 @@ v_{n-2} - 2v_{n-1} + v_n = F_{n-1} \,\,\,\, &\rightarrow \,\,\,\, F_{n-1} - v_{n
 $$
 
 [problem_layout]: /assets/images/multigrid/problem_layout.svg
-[coarse_grid_jacobi]: /assets/images/multigrid/coarse_grid_jacobi.svg
 {: .align-center}
+[coarse_grid_jacobi]: /assets/images/multigrid/coarse_grid_jacobi.svg
+{: .align-left}
