@@ -29,7 +29,7 @@ Before I get into it, I should mention that there are a number of different comm
 
 I have a grid of equally spaced points with a charge distribution $\rho$ defined at each point:
 
-![problem_layout]{:width=300px}
+![problem_layout]{:class="img-responsive"}
 
 and so on. The goal is to find the voltage $v$ everywhere, where the voltage is determined by Poisson's equation, mentioned above. In the context of electromagnetism (where it's often encountered) it is written
 
@@ -40,7 +40,7 @@ $$
 \end{align}
 $$
 
-but for our purposes, I'm just going to use $f\equiv-\frac{\rho}{\epsilon}$. Since we're interested in solving for the value of $v$ on a set of discrete points, the first step in tackling the problem is to change the laplacian, which acts on a _continuous_ scalar field, into a _discrete_ operator. Using the central finite differences scheme, a derivative can be approximated by
+but for our purposes, I'm just going to use $f\equiv\frac{\rho}{\epsilon}$. Since we're interested in solving for the value of $v$ on a set of discrete points, the first step in tackling the problem is to change the laplacian, which acts on a _continuous_ scalar field, into a _discrete_ operator. Using the central finite differences scheme, a derivative can be approximated by
 
 $$
 \frac{\mathrm{d}v}{\mathrm{d}x} = v' \approx \frac{v(x+\frac{1}{2}\Delta x) - v(x-\frac{1}{2}\Delta x)}{\Delta x}
@@ -52,11 +52,11 @@ $$
 \nabla^2 v = \frac{\mathrm{d}v'}{\mathrm{d}x} \approx \frac{v'(x+\frac{1}{2}\Delta x) - v'(x-\frac{1}{2}\Delta x)}{\Delta x} = \frac{v(x+\Delta x) - 2v(x) + v(x-\Delta x)}{\Delta x^2}
 $$
 
-Since it's annoying to write $v(x+\Delta x)$ everywhere, I'm just going to use $v_i$ for the value of the voltage at $x_i$, which means that $v(x+\Delta x) \rightarrow v_{i+1}$, etc. Now the discrete laplacian is just
+Since it's annoying to write $v(x+\Delta x)$ everywhere, I'm just going to use $v_i$ for the value of the voltage at $x_i$, which means that $v(x+\Delta x) \rightarrow v_{i+1}$, etc. Now the LHS of $\ref{eq:ref1}$ is just
 
 $$
 \begin{align}
-\nabla^2 v \,\,\rightarrow\,\, & \frac{v_{i+1} - 2v_i + v_{i-1}}{\Delta x^2}, \,\,\,\, 1 \le i \le n-1 \\
+-\nabla^2 v \,\,\rightarrow\,\, & \frac{-v_{i+1} + 2v_i - v_{i-1}}{\Delta x^2}, \,\,\,\, 1 \le i \le n-1 \\
 & v_0 = v_n = 0
 \end{align}
 $$
@@ -65,19 +65,19 @@ Rewriting this in terms of matrices allows us to reduce the amount of notation e
 
 $$
 \begin{align}
-\frac{1}{\Delta x^2}\begin{pmatrix} 1 & -2 & 1 & \, & \, & \, & \, & \, \\ & \, 1 & -2 & 1 & \, & \, & \, & \, \\ \, & \, & \, & \, & \ddots \, & \, & \, & \\ \, & \, & \, & \, & \, & 1 & -2 & 1 \end{pmatrix}
+\frac{1}{\Delta x^2}\begin{pmatrix} -1 & 2 & -1 & \, & \, & \, & \, & \, \\ & \, -1 & 2 & -1 & \, & \, & \, & \, \\ \, & \, & \, & \, & \ddots \, & \, & \, & \\ \, & \, & \, & \, & \, & -1 & 2 & -1 \end{pmatrix}
 \begin{pmatrix} v_1 \\ v_2 \\ \vdots \\ v_{n-1} \end{pmatrix}
  &= \begin{pmatrix} f_1 \\ f_2 \\ \vdots \\ f_{n-1} \end{pmatrix} \\
-Av &= f
+Av = f
 \label{eq:ref2}
 \end{align}
 $$
 
-where $A$ is the discretized laplacian we found above. Of course, ($\ref{eq:ref2}$) can be solved by inverting $A$, i.e. $v = A^{-1}f$, but in general we are talking about problems large enough that directly computing $A^{-1}$ is impractical (or at least really inefficient).
+where $A$ is the (negative) discretized laplacian we found above. Of course, ($\ref{eq:ref2}$) can be solved by inverting $A$, i.e. $v = A^{-1}f$, but in general we are talking about problems large enough that directly computing $A^{-1}$ is impractical (or at least really inefficient).
 
 # Jacobi Iteration
 
-The simplest iterative method for solving ($\ref{eq:ref2}$) is _Jacobi iteration_. Let's take a look at ($\ref{eq:ref2}$): it would be great if we could just invert $A$ to find the solution directly, but that's too hard, because this matrix has off-diagonal elements. If it only had nonzero elements along the diagonal, then we could find $A^{-1}$ easily - the inverse of a square diagonal matrix $D$ is just $D^{-1} = 1/D_{ij}$, with $ij$ representing the matrix indices. So we begin by trying to break $A$ into two matrices - $D$, with all the diagonal elements, and $Q$, with all the off-diagonal elements:
+The simplest iterative method for solving ($\ref{eq:ref2}$) is _Jacobi iteration_. Let's take a look at ($\ref{eq:ref2}$): it would be great if we could just invert $A$ to find the solution directly, but that's too hard because this matrix has off-diagonal elements. If it only had nonzero elements along the diagonal, then we could find $A^{-1}$ easily - the inverse of a square diagonal matrix $D$ is also a diagonal matrix with reciprocals along the diagonal. So we begin by trying to break $A$ into two matrices - $D$, with all the diagonal elements, and $Q$, with all the off-diagonal elements:
 
 $$
 A = D-Q
@@ -94,7 +94,7 @@ v &= D^{-1}Qv + D^{-1}f
 \end{align}
 $$
 
-In this scheme, we start by making an initial guess $V^0_i$ at the solution, and plugging this into the right hand side to get the first iterative improvement $v^1_i$. We then plug that back in to the right hand side, and calculate again to improve that solution iteratively. This works because the improved solution $v^1_i$ is found from the values of the neighboring points at the last iteration:
+We start by making an initial guess $V^0_i$ at the solution, and then plugging this into the right hand side to get the first iterative improvement $v^1_i$. The result is then plugged back in to the right hand side, and so on, to improve the solution iteratively. Notice that the improved solution $v^1_i$ is found from the values of the neighboring points at the last iteration:
 
 $$
 \begin{align}
@@ -143,7 +143,29 @@ At this point you might complain that the convergence in the examples above is s
 
 After iterating the Jacobi solver 100 times, the error $e=f-Av$ is much smaller on the coarse $2h$ grid than it is on the original $h$ grid (though a lot more iterations are still needed to get close to the actual answer). The efficiency gains can be even greater if you move to even more coarse grids:
 
+![error_vs_gridsize]{:class="img-responsive"}
 
+This behavior is really simple to understand when you look at what happens when you move from a fine grid to a coarse grid:
+
+![fine_to_coarse]{:class="img-responsive"}
+
+Slowly varying functions on the fine grid _appear_ to vary more rapidly on the coarse grid! So this is why the Jacobi method is better on coarser grids, and it motivates the main steps of the multigrid method:
+
+1. Start on some grid with spacing $h$, a linear differential operator $A$, driving function $f$, and initial guess $v^0$.
+2. Move to a coarser grid with spacing $2h$
+3. Use the Jacobi solver a few times here to get a better trial solution
+4. Move back to the fine grid
+5. Run the Jacobi solver a few more times to finish up
+
+These steps are easily visualized:
+
+![one_level_v]{:class="img-responsive"}
+
+Of course you don't have to stop with one grid-coarsening step - in fact, it's best to move to the coarsest grid possible, using the Jacobi solver there, and then moving back to the fine grid:
+
+![multi_level_v]{:class="img-responsive"}
+
+This is called the V-cycle multigrid method (VMG for short), and it allows these sorts of problems to be solved way faster than using the Jacobi method on the original problem alone.
 
 # Appendix: Dirichlet Boundary Conditions
 
@@ -160,3 +182,11 @@ $$
 {: .align-center}
 [coarse_grid_jacobi]: /assets/images/multigrid/coarse_grid_jacobi.svg
 {: .align-left}
+[error_vs_gridsize]: /assets/images/multigrid/error_vs_gridsize.svg
+{: .align-right}
+[fine_to_coarse]: /assets/images/multigrid/fine_to_coarse.svg
+{: .align-center}
+[one_level_v]: /assets/images/multigrid/one_level_v.svg
+{: .align-left}
+[multi_level-v]: /assets/images/multigrid/multi_level_v.svg
+{: .align-center}
