@@ -29,7 +29,7 @@ Before I get into it, I should mention that there are a number of different comm
 
 I have a grid of equally spaced points with a charge distribution $\rho$ defined at each point:
 
-![problem_layout]
+![problem_layout]{:width=300px}
 
 and so on. The goal is to find the voltage $v$ everywhere, where the voltage is determined by Poisson's equation, mentioned above. In the context of electromagnetism (where it's often encountered) it is written
 
@@ -67,17 +67,17 @@ $$
 \begin{align}
 \frac{1}{\Delta x^2}\begin{pmatrix} 1 & -2 & 1 & \, & \, & \, & \, & \, \\ & \, 1 & -2 & 1 & \, & \, & \, & \, \\ \, & \, & \, & \, & \ddots \, & \, & \, & \\ \, & \, & \, & \, & \, & 1 & -2 & 1 \end{pmatrix}
 \begin{pmatrix} v_1 \\ v_2 \\ \vdots \\ v_{n-1} \end{pmatrix}
- = \begin{pmatrix} f_1 \\ f_2 \\ \vdots \\ f_{n-1} \end{pmatrix} \\
-Av = f
+ &= \begin{pmatrix} f_1 \\ f_2 \\ \vdots \\ f_{n-1} \end{pmatrix} \\
+Av &= f
 \label{eq:ref2}
 \end{align}
 $$
 
-where $A$ is the discretized laplacian we found above. Of course, \ref{eq:ref2} can be solved by inverting $A$, i.e. $v = A^{-1}f$, but in general we are talking about problems large enough that directly computing $A^{-1}$ is impractical (or at least really inefficient).
+where $A$ is the discretized laplacian we found above. Of course, ($\ref{eq:ref2}$) can be solved by inverting $A$, i.e. $v = A^{-1}f$, but in general we are talking about problems large enough that directly computing $A^{-1}$ is impractical (or at least really inefficient).
 
 # Jacobi Iteration
 
-The simplest iterative method for solving $\ref{eq:ref2}$ is _Jacobi iteration_. Let's take a look at $\ref{eq:ref2}$: it would be great if we could just invert $A$ to find the solution directly, but that's too hard, because this matrix has off-diagonal elements. If it only had nonzero elements along the diagonal, then we could find $A^{-1}$ easily - the inverse of a square diagonal matrix $D$ is just $D^{-1} = 1/D_{ij}$, with $ij$ representing the matrix indices. So we begin by trying to break $A$ into two matrices - $D$, with all the diagonal elements, and $Q$, with all the off-diagonal elements:
+The simplest iterative method for solving ($\ref{eq:ref2}$) is _Jacobi iteration_. Let's take a look at ($\ref{eq:ref2}$): it would be great if we could just invert $A$ to find the solution directly, but that's too hard, because this matrix has off-diagonal elements. If it only had nonzero elements along the diagonal, then we could find $A^{-1}$ easily - the inverse of a square diagonal matrix $D$ is just $D^{-1} = 1/D_{ij}$, with $ij$ representing the matrix indices. So we begin by trying to break $A$ into two matrices - $D$, with all the diagonal elements, and $Q$, with all the off-diagonal elements:
 
 $$
 A = D-Q
@@ -103,7 +103,7 @@ v^1_i = D^{-1}Qv^0_i + D^{-1}f = \frac{1}{2}(v^0_{i-1} + v^0_{i+1} + f_i)
 \end{align}
 $$
 
-This is pretty good, because now the problem is just turning the crank as fast as the computer will go. But there's actually a neat trick which will speed up how fast this solution converges: instead of using the RHS of $\ref{eq:ref3}$ as the improved solution, we can treat it as an intermediate value: $v^* = D^{-1}Qv^0_i + D^{-1}f$. We then mix $v^*$ with part of the original solution to get the next iteration,
+This is pretty good, because now the problem is just turning the crank as fast as the computer will go. But there's actually a neat trick which will speed up how fast this solution converges: instead of using the RHS of ($\ref{eq:ref3}$) as the improved solution, we can treat it as an intermediate value: $v^* = D^{-1}Qv^0_i + D^{-1}f$. We then mix $v^*$ with part of the original solution to get the next iteration,
 
 $$
 v^1_i = wv^*_i + (1-w)v^0_i
@@ -121,21 +121,27 @@ Things get [a little more complicated](#appendix-dirichlet-boundary-conditions) 
 
 # Why Is This So Slow???
 
-Going back to $\ref{eq:ref4}$ you can see that at each iteration, the value of $v_i$ can only be affected by neighboring points. It therefore takes a lot of iterations for values of $v$ on one end of the lattice to have any effect on the other end. This makes the Jacobi method great for relaxing initial guesses like this:
+Going back to ($\ref{eq:ref4}$) you can see that at each iteration, the value of $v_i$ is only affected by neighboring points. It therefore takes a lot of iterations - $n$ iterations for a grid of $n$ points - for values of $v$ on one end of the lattice to have any effect on the other end. This makes the Jacobi method great for relaxing initial guesses like this:
 
 <video autoplay="autoplay" loop="loop" width="1024" height="480">
   <source src="/assets/images/multigrid/jacobi_highfreq.mp4" type="video/mp4">
 </video>
 
-See how quickly it suppresses the high frequency components of the initial guess? After only a few iterations $v$ is relaxed into a more sensible form, but it takes a _lot_ more iterations to actually get it close to the real solution. On the other hand, it's pretty terrible for intial guesses like this:
+See how quickly it suppresses the high frequency components of the initial guess? After only a few iterations $v$ is relaxed into a more sensible form, but it takes a _lot_ more iterations to actually get it close to the real solution. On the other hand, it's terrible for intial guesses like this:
 
 <video autoplay="autoplay" loop="loop" width="1024" height="480">
   <source src="/assets/images/multigrid/jacobi_lowfreq.mp4" type="video/mp4">
 </video>
 
-which only have low frequencies; it just takes too many iterations for it to get smoothed out and converge. This is the most important thing to realize about the Jacobi method: it's only good at smoothing out trial solutions which have high frequencies - it's useless at anything else.
+which only have low frequencies; it just takes too many iterations for it to get smoothed out and converge. This is the most important point about the Jacobi method: it's only good at smoothing out trial solutions which have high frequencies - it's useless at anything else.
 
 # Multigrid
+
+At this point you might complain that the convergence in the examples above is slow because I used obviously bad initial guesses for $v$, and you'd be right. If our initial guesses were better, we wouldn't have to spend so much time iterating (of course, if your initial guess _is the exact solution_, you don't have to iterate at all...). We already know the convergence rate of the Jacobi method depends strongly on how many points are in the grid; so instead of trying to find the solution on the original grid with $n$ points (with spacing $h$), let's first use the Jacobi method on a coarse grid with $n/2$ points (with spacing $2h$) to try to improve our initial guess.
+
+![coarse_grid_jacobi]{:class="img-responsive"}
+
+After iterating the Jacobi solver 100 times, the error $e=f-Av$ is much smaller on the coarse $2h$ grid than it is on the original $h$ grid (though a lot more iterations are still needed to get close to the actual answer). The efficiency gains can be even greater if you move to even more coarse grids:
 
 
 
@@ -150,5 +156,6 @@ v_{n-2} - 2v_{n-1} + v_n = F_{n-1} \,\,\,\, &\rightarrow \,\,\,\, F_{n-1} - v_{n
 \end{align}
 $$
 
-
+[problem_layout]: /assets/images/multigrid/problem_layout.svg
+[coarse_grid_jacobi]: /assets/images/multigrid/coarse_grid_jacobi.svg
 {: .align-center}
