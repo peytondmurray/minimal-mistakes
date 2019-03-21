@@ -18,7 +18,10 @@ This is a work in progress. It's going to take a few days to write everything ou
 About a year ago, I was working on a for-fun problem where I needed to determine the voltage from an arbitrary charge distribution along 1 dimension. This is the problem of solving a linear differential equation (in this case Poisson's equation) given a driving function $f$:
 
 $$
-\nabla^2 v = f
+\begin{align}
+-\nabla^2 v = f
+\label{eq:poisson}
+\end{align}
 $$
 
 Unless we're involved in developing numerical libraries, it's not too often that we think about how these problems can be solved numerically. The fact there aren't very many blog posts about this kind of stuff shows how infrequently we think about these sorts of algorithms, so I wanted to give it a shot.
@@ -31,16 +34,16 @@ I have a grid of equally spaced points with a charge distribution $\rho$ defined
 
 ![problem_layout]{:class="img-responsive"}
 
-and so on. The goal is to find the voltage $v$ everywhere, where the voltage is determined by Poisson's equation, mentioned above. In the context of electromagnetism (where it's often encountered) it is written
+and so on. The goal is to find the voltage $v$ everywhere, where the voltage is determined by Poisson's equation ($\ref{eq:poisson}$). In the context of electromagnetism (where it's often encountered) it is written
 
 $$
 \begin{align}
-\nabla^2 v = -\frac{\rho}{\epsilon}
+-\nabla^2 v = \frac{\rho}{\epsilon}.
 \label{eq:ref1}
 \end{align}
 $$
 
-but for our purposes, I'm just going to use $f\equiv\frac{\rho}{\epsilon}$. Since we're interested in solving for the value of $v$ on a set of discrete points, the first step in tackling the problem is to change the laplacian, which acts on a _continuous_ scalar field, into a _discrete_ operator. Using the central finite differences scheme, a derivative can be approximated by
+Since we're interested in solving for the value of $v$ on a set of discrete points, the first step in tackling the problem is to change the laplacian, which acts on a _continuous_ scalar field, into a _discrete_ operator. Using the central finite differences scheme, a derivative can be approximated by
 
 $$
 \frac{\mathrm{d}v}{\mathrm{d}x} = v' \approx \frac{v(x+\frac{1}{2}\Delta x) - v(x-\frac{1}{2}\Delta x)}{\Delta x}
@@ -52,7 +55,7 @@ $$
 \nabla^2 v = \frac{\mathrm{d}v'}{\mathrm{d}x} \approx \frac{v'(x+\frac{1}{2}\Delta x) - v'(x-\frac{1}{2}\Delta x)}{\Delta x} = \frac{v(x+\Delta x) - 2v(x) + v(x-\Delta x)}{\Delta x^2}
 $$
 
-Since it's annoying to write $v(x+\Delta x)$ everywhere, I'm just going to use $v_i$ for the value of the voltage at $x_i$, which means that $v(x+\Delta x) \rightarrow v_{i+1}$, etc. Now the LHS of $\ref{eq:ref1}$ is just
+Since it's annoying to write $v(x+\Delta x)$ everywhere, I'm just going to use $v_i$ for the value of the voltage at $x_i$, which means that $v(x+\Delta x) \rightarrow v_{i+1}$, etc. Now the LHS of $(\ref{eq:ref1})$ is just
 
 $$
 \begin{align}
@@ -65,19 +68,26 @@ Rewriting this in terms of matrices allows us to reduce the amount of notation e
 
 $$
 \begin{align}
-\frac{1}{\Delta x^2}\begin{pmatrix} -1 & 2 & -1 & \, & \, & \, & \, & \, \\ & \, -1 & 2 & -1 & \, & \, & \, & \, \\ \, & \, & \, & \, & \ddots \, & \, & \, & \\ \, & \, & \, & \, & \, & -1 & 2 & -1 \end{pmatrix}
+\begin{pmatrix} -1 & 2 & -1 & \, & \, & \, & \, & \, \\ & \, -1 & 2 & -1 & \, & \, & \, & \, \\ \, & \, & \, & \, & \ddots \, & \, & \, & \\ \, & \, & \, & \, & \, & -1 & 2 & -1 \end{pmatrix}
 \begin{pmatrix} v_1 \\ v_2 \\ \vdots \\ v_{n-1} \end{pmatrix}
- &= \begin{pmatrix} f_1 \\ f_2 \\ \vdots \\ f_{n-1} \end{pmatrix} \\
+ &= \begin{pmatrix} f_1 \\ f_2 \\ \vdots \\ f_{n-1} \end{pmatrix}
+\end{align}
+$$
+
+or more concisely,
+
+$$
+\begin{align}
 Av = f
 \label{eq:ref2}
 \end{align}
 $$
 
-where $A$ is the (negative) discretized laplacian we found above. Of course, ($\ref{eq:ref2}$) can be solved by inverting $A$, i.e. $v = A^{-1}f$, but in general we are talking about problems large enough that directly computing $A^{-1}$ is impractical (or at least really inefficient).
+where $A$ is the (negative) discretized laplacian we found above and $f\equiv \Delta x^2 \frac{\rho}{\epsilon}$. Of course, ($\ref{eq:ref2}$) can be solved by inverting $A$, i.e. $v = A^{-1}f$, but in general we are talking about problems large enough that directly computing $A^{-1}$ is impractical (or at least really inefficient). This turns out to be the case even for very small systems.
 
 # Jacobi Iteration
 
-The simplest iterative method for solving ($\ref{eq:ref2}$) is _Jacobi iteration_. Let's take a look at ($\ref{eq:ref2}$): it would be great if we could just invert $A$ to find the solution directly, but that's too hard because this matrix has off-diagonal elements. If it only had nonzero elements along the diagonal, then we could find $A^{-1}$ easily - the inverse of a square diagonal matrix $D$ is also a diagonal matrix with reciprocals along the diagonal. So we begin by trying to break $A$ into two matrices - $D$, with all the diagonal elements, and $Q$, with all the off-diagonal elements:
+The simplest iterative method for solving ($\ref{eq:ref2}$) is _Jacobi iteration_. Let's take a look at ($\ref{eq:ref2}$): it would be great if we could just invert $A$ to find the solution directly, but that's too hard because this matrix has off-diagonal elements. If the only nonzero elements were along the diagonal, finding $A^{-1}$ would be easy; the reciprocal of a diagonal matrix $D_{ii}^-1 = 1/D_{ii}$. So we begin by trying to break $A$ into two matrices - $D$, with all the diagonal elements, and $Q$, with all the off-diagonal elements:
 
 $$
 A = D-Q
@@ -94,7 +104,7 @@ v &= D^{-1}Qv + D^{-1}f
 \end{align}
 $$
 
-We start by making an initial guess $V^0_i$ at the solution, and then plugging this into the right hand side to get the first iterative improvement $v^1_i$. The result is then plugged back in to the right hand side, and so on, to improve the solution iteratively. Notice that the improved solution $v^1_i$ is found from the values of the neighboring points at the last iteration:
+We start by making an initial guess $V^0_i$ at the solution, then plugging this into the right hand side to get the first iterative improvement $v^1_i$. The result is then plugged back in to the right hand side, and so on, to improve the solution iteratively. Notice that the improved solution $v^1_i$ is found from the values of the neighboring points at the last iteration:
 
 $$
 \begin{align}
@@ -151,7 +161,7 @@ This behavior is really simple to understand when you look at what happens when 
 
 Slowly varying functions on the fine grid _appear_ to vary more rapidly on the coarse grid! So this is why the Jacobi method is better on coarser grids, and it motivates the main steps of the multigrid method:
 
-1. Start on some grid with spacing $h$, a linear differential operator $A$, driving function $f$, and initial guess $v^0$.
+1. Start on some grid with spacing $h$, a linear differential operator $A$, driving function $f$, and initial guess $v^0$. Iterate a few times with the Jacobi solver to smooth out high frequency components of the original guess.
 2. Move to a coarser grid with spacing $2h$
 3. Use the Jacobi solver a few times here to get a better trial solution
 4. Move back to the fine grid
@@ -161,11 +171,25 @@ These steps are easily visualized:
 
 ![one_level_v]{:class="img-responsive"}
 
-Of course you don't have to stop with one grid-coarsening step - in fact, it's best to move to the coarsest grid possible, using the Jacobi solver there, and then moving back to the fine grid:
+Of course you don't have to stop with one grid-coarsening step - in fact, it's best to move to a coarse grid, iterate the Jacobi solver a few times, then move to a coarser grid, Jacobi-iterate a few times, and so on. At some point, the coarse grid will only consist of a few points; then you move back to a finer grid, Jacobi-iterate a few times, move to a finer grid, Jacobi iterate a few more times, and so on until you get back to the original grid spacing:
 
 ![multi_level_v]{:class="img-responsive"}
 
-This is called the V-cycle multigrid method (VMG for short), and it allows these sorts of problems to be solved way faster than using the Jacobi method on the original problem alone.
+This is called the V-cycle multigrid method (VMG for short), and it allows these sorts of problems to be solved way faster than using the Jacobi method on the original problem alone. In practice, it turns out to be even better to start on the coarsest grid possible, and follow this sort of pattern, called Full Multigrid (FMG):
+
+![full_multigrid]{:class="img-responsive"}
+
+# Moving Between Grids
+
+Up until now, I've swept the details of switching between different grid spacings under the rug. Of course, it's an important part of the machinery behind multigrid, but it actually turns out to be pretty simple. To move $v$ from a grid with spacing $2h$ to one with spacing $h$, we just use an interpolation scheme:
+
+$$
+v_i^{h} =
+\begin{cases}
+\frac{1}{2}v_{i/2}^{2h} & \text{for odd } i \\
+\frac{1}{2}(v_{(i-1)/2}^{2h} + v_{(i+1)/2}^{2h}) & \text{for even } i
+\end{cases}
+$$
 
 # Appendix: Dirichlet Boundary Conditions
 
@@ -187,6 +211,8 @@ $$
 [fine_to_coarse]: /assets/images/multigrid/fine_to_coarse.svg
 {: .align-center}
 [one_level_v]: /assets/images/multigrid/one_level_v.svg
-{: .align-left}
-[multi_level-v]: /assets/images/multigrid/multi_level_v.svg
+{: .align-center}
+[multi_level_v]: /assets/images/multigrid/multi_level_v.svg
+{: .align-center}
+[full_multigrid]: /assets/images/multigrid/full_multigrid.svg
 {: .align-center}
