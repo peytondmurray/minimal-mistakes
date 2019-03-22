@@ -68,7 +68,12 @@ Rewriting this in terms of matrices allows us to reduce the amount of notation e
 
 $$
 \begin{align}
-\begin{pmatrix} -1 & 2 & -1 & \, & \, & \, & \, & \, \\ & \, -1 & 2 & -1 & \, & \, & \, & \, \\ \, & \, & \, & \, & \ddots \, & \, & \, & \\ \, & \, & \, & \, & \, & -1 & 2 & -1 \end{pmatrix}
+\begin{pmatrix}
+2 & -1 & \, & \, & \, & \, \\
+-1 & 2 & -1 & \, & \, & \, \\
+\, & \, & \, & \ddots & \, & \, \\
+\, & \, & \, & \, & -1 & 2
+\end{pmatrix}
 \begin{pmatrix} v_1 \\ v_2 \\ \vdots \\ v_{n-1} \end{pmatrix}
  &= \begin{pmatrix} f_1 \\ f_2 \\ \vdots \\ f_{n-1} \end{pmatrix}
 \end{align}
@@ -83,7 +88,7 @@ Av = f
 \end{align}
 $$
 
-where $A$ is the (negative) discretized laplacian we found above and $f\equiv \Delta x^2 \frac{\rho}{\epsilon}$. Of course, ($\ref{eq:ref2}$) can be solved by inverting $A$, i.e. $v = A^{-1}f$, but in general we are talking about problems large enough that directly computing $A^{-1}$ is impractical (or at least really inefficient). This turns out to be the case even for very small systems.
+where $A$ is the (negative) discretized laplacian we found above and $f\equiv \rho \Delta x^2 / \epsilon$. Of course, ($\ref{eq:ref2}$) can be solved by inverting $A$, i.e. $v = A^{-1}f$, but in general we are talking about problems large enough that directly computing $A^{-1}$ is impractical (or at least really inefficient). This turns out to be the case even for very small systems.
 
 # Jacobi Iteration
 
@@ -159,15 +164,7 @@ This behavior is really simple to understand when you look at what happens when 
 
 ![fine_to_coarse]{:class="img-responsive"}
 
-Slowly varying functions on the fine grid _appear_ to vary more rapidly on the coarse grid! So this is why the Jacobi method is better on coarser grids, and it motivates the main steps of the multigrid method:
-
-1. Start on some grid with spacing $h$, a linear differential operator $A$, driving function $f$, and initial guess $v^0$. Iterate a few times with the Jacobi solver to smooth out high frequency components of the original guess.
-2. Move to a coarser grid with spacing $2h$
-3. Use the Jacobi solver a few times here to get a better trial solution
-4. Move back to the fine grid
-5. Run the Jacobi solver a few more times to finish up
-
-These steps are easily visualized:
+Slowly varying functions on the fine grid _appear_ to vary more rapidly on the coarse grid! So this is why the Jacobi method is better on coarser grids, and it motivates the main steps of the multigrid method, which I think are best represented as a schematic:
 
 ![one_level_v]{:class="img-responsive"}
 
@@ -175,39 +172,76 @@ Of course you don't have to stop with one grid-coarsening step - in fact, it's b
 
 ![multi_level_v]{:class="img-responsive"}
 
-This is called the V-cycle multigrid method (VMG for short), and it allows these sorts of problems to be solved way faster than using the Jacobi method on the original problem alone. In practice, it turns out to be even better to start on the coarsest grid possible, and follow this sort of pattern, called Full Multigrid (FMG):
+This is called the V-cycle multigrid method (VMG), and it allows these sorts of problems to be solved way faster than using the Jacobi method on the original problem alone. In practice, it turns out to be even better to start on the coarsest grid possible, and follow this sort of pattern, called Full Multigrid (FMG):
 
 ![full_multigrid]{:class="img-responsive"}
 
 # Moving Between Grids
 
-Up until now, I've swept the details of switching between different grid spacings under the rug. Of course, it's an important part of the machinery behind multigrid, but it actually turns out to be pretty simple. To move $v$ from a grid with spacing $2h$ to one with spacing $h$, we just use an interpolation scheme:
+Up until now, I've swept the details of switching between different grid spacings under the rug. Of course, it's an important part of the machinery behind multigrid, but it actually turns out to be pretty simple - you just use interpolation. When moving $v$ from a grid with spacing $2h$ to one with spacing $h$, the process is called _restriction_:
+
+$$
+v_i^{2h} =
+\begin{cases}
+v_{2i}^{h} & \text{for even } i \\
+\frac{1}{2}(v_{2i-1}^{h} + v_{2i+1}^{h}) & \text{for odd } i
+\end{cases}
+$$
+
+Under this scheme, if a point in the coarse grid lies at the same $x$ position as a point in the fine grid, we just take the value of $v$ there. Otherwise, you just average the adjacent points in the fine grid to find the value in the coarse grid. Best of all, if you want to go from a coarse grid to a finer grid spacing, you just do the reverse process, called _prolongation_:
 
 $$
 v_i^{h} =
 \begin{cases}
-\frac{1}{2}v_{i/2}^{2h} & \text{for odd } i \\
-\frac{1}{2}(v_{(i-1)/2}^{2h} + v_{(i+1)/2}^{2h}) & \text{for even } i
+v_{i/2}^{2h} & \text{for even } i \\
+\frac{1}{2}(v_{(i-1)/2}^{2h} + v_{(i+1)/2}^{2h}) & \text{for odd } i
 \end{cases}
+$$
+
+The prolongation and restriction operations can be represented as linear operators:
+
+$$
+\begin{alinged}[c]
+\text{Restriction}
+I_{h\rightarrow2h} = 
+\begin{pmatrix}
+0.5 & \, & \, & \, & \, & \, & \,
+\end{pmatrix}
+\end{alinged}[c]
+\begin{alinged}[c]
+\text{Prolongation}
+I_{2h\rightarrowh}
+\end{alinged}[c]
 $$
 
 # Appendix: Dirichlet Boundary Conditions
 
-To include the effects of fixed voltage at the boundary points $v_0$ and $v_n$ into $(\ref{eq:ref2})$, we only need to write down the discrete Poisson's equation at the adjacent points:
+To include the effects of fixed voltage at the boundary points $v_0$ and $v_n$ into $(\ref{eq:ref2})$, we only need to write down the discrete Poisson's equation at the points _adjacent_ to the edge:
 
 $$
 \begin{align}
-v_0 - 2v_1 + v_2 = F_1 \,\,\,\, &\rightarrow \,\,\,\, F_1 - v_0 = 2v_1 + v_2 \\
-v_{n-2} - 2v_{n-1} + v_n = F_{n-1} \,\,\,\, &\rightarrow \,\,\,\, F_{n-1} - v_{n} = v_{n-2} - 2v_{n-1}
+v_0 - 2v_1 + v_2 = f_1 \,\,\,\, &\rightarrow \,\,\,\, f_1 - v_0 = 2v_1 + v_2 \\
+v_{n-2} - 2v_{n-1} + v_n = f_{n-1} \,\,\,\, &\rightarrow \,\,\,\, f_{n-1} - v_{n} = v_{n-2} - 2v_{n-1}
 \end{align}
+$$
+
+This means that you can use the $A$, $I_{h2h}$, and $I_{2hh}$ operators and all of the associated machinery above with only a slight modification to the $f$-vector:
+
+$$
+f =
+\begin{pmatrix}
+f_1 - v_0 \\
+\vdots
+f_{n-1} - v_{n-1}
+\end{pmatrix}
 $$
 
 [problem_layout]: /assets/images/multigrid/problem_layout.svg
 {: .align-center}
 [coarse_grid_jacobi]: /assets/images/multigrid/coarse_grid_jacobi.svg
-{: .align-left}
+{: .align-center}
 [error_vs_gridsize]: /assets/images/multigrid/error_vs_gridsize.svg
-{: .align-right}
+{: .align-center}
 [fine_to_coarse]: /assets/images/multigrid/fine_to_coarse.svg
 {: .align-center}
 [one_level_v]: /assets/images/multigrid/one_level_v.svg
