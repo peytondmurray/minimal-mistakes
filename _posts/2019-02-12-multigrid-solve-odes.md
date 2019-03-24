@@ -92,7 +92,7 @@ where $A$ is the (negative) discretized laplacian we found above and $f\equiv \r
 
 # Jacobi Iteration
 
-The simplest iterative method for solving ($\ref{eq:ref2}$) is _Jacobi iteration_. Let's take a look at ($\ref{eq:ref2}$): it would be great if we could just invert $A$ to find the solution directly, but that's too hard because this matrix has off-diagonal elements. If the only nonzero elements were along the diagonal, finding $A^{-1}$ would be easy; the reciprocal of a diagonal matrix $D_{ii}^-1 = 1/D_{ii}$. So we begin by trying to break $A$ into two matrices - $D$, with all the diagonal elements, and $Q$, with all the off-diagonal elements:
+The simplest iterative method for solving ($\ref{eq:ref2}$) is _Jacobi iteration_. Let's take a look at ($\ref{eq:ref2}$): it would be great if we could just invert $A$ to find the solution directly, but that's too hard because this matrix has off-diagonal elements. If the only nonzero elements were along the diagonal, finding $A^{-1}$ would be easy; the reciprocal of a diagonal matrix $D_{ii}^{-1} = 1/D_{ii}$. So we begin by trying to break $A$ into two matrices: $D$, with all the diagonal elements, and $Q$, with all the off-diagonal elements:
 
 $$
 A = D-Q
@@ -198,21 +198,44 @@ v_{i/2}^{2h} & \text{for even } i \\
 \end{cases}
 $$
 
-The prolongation and restriction operations can be represented as linear operators:
+The prolongation and restriction operations can be represented as matrices:
 
 $$
-\begin{alinged}[c]
-\text{Restriction}
-I_{h\rightarrow2h} = 
+\begin{align*}
+I_{h\rightarrow 2h} &=
+\frac{1}{2}
 \begin{pmatrix}
-0.5 & \, & \, & \, & \, & \, & \,
-\end{pmatrix}
-\end{alinged}[c]
-\begin{alinged}[c]
-\text{Prolongation}
-I_{2h\rightarrowh}
-\end{alinged}[c]
+0.5 & 1 & 0.5 & \, & \, & \, & \, & \, \\
+\, & 0.5 & 1 & 0.5 & \, & \, & \, & \, \\
+\, & \, & \, & \, & \ddots & \, & \, & \, \\
+\, & \, & \, & \, & \, & 0.5 & 1 & 0.5 \\
+\end{pmatrix} \;\;\; & \text{(Restriction)} \\
+I_{2h\rightarrow h} &=
+\begin{pmatrix}
+0.5 & \, & \, & \, \\
+1 & \, & \, & \, \\
+0.5 & 0.5 & \, & \, \\
+\, & 1 & \, & \, \\
+\, & 0.5 & \, & \, \\
+\, & \, & \ddots & \, \\
+\, & \, & \, & 0.5 \\
+\, & \, & \, & 1 & \\
+\, & \, & \, & 0.5 \\
+\end{pmatrix} & \text{(Prolongation)}
+\end{align*}
 $$
+
+You can see that the prolongation and restriction operators are related by $I_{h\rightarrow 2h} = 0.5I_{2h\rightarrow h}^T$, which makes computing them simple. Now moving between coarse and fine grids is easy:
+
+$$
+\begin{align*}
+v_{2h} &= I_{h\rightarrow 2h}v_h \\
+f_{2h} &= I_{h\rightarrow 2h}f_h \\
+A_{2h} &= I_{h\rightarrow 2h} A_h I_{2h\rightarrow h}
+\end{align*}
+$$
+
+
 
 # Appendix: Dirichlet Boundary Conditions
 
@@ -231,7 +254,7 @@ $$
 f =
 \begin{pmatrix}
 f_1 - v_0 \\
-\vdots
+\vdots \\
 f_{n-1} - v_{n-1}
 \end{pmatrix}
 $$
