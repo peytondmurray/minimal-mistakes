@@ -6,7 +6,6 @@ read_time: true
 share: true
 date: '2019-02-26 14:30:00 -0800'
 categories: coding
-toc: true
 ---
 
 I simulate magnetic materials for science.  The output of the [simulation package][mumax] that I use is a binary data format (ovf) which I then convert into [VTK format][VTK]. These VTK files contain snapshots of my magnetic material at different points in time, and they can be easily viewed and manipulated using [Paraview][paraview], a free and open source scientific data analysis and visualization tool developed and maintained by [Kitware][kitware]. If you're familiar with Kitware (cmake, vtk, ...), you probably already know that the documentation for these tools is ...incomplete? A work in progress? Look, if you work at Kitware, I'm really sorry, this isn't some sort of attack on you - I know how difficult good documentation can be. But there's a really steep learning curve, so I'm hoping that showcasing how I use Paraview will help others get over this barrier. Here's what the data looks like when I load it in:
