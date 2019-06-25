@@ -122,7 +122,7 @@ $$
 
 where $w$ is a constant less than $1$. This is the *weighted Jacobi method*, and it's faster than standard Jacobi iteration. When $w=1$, the original Jacobi iteration is recovered.
 
-<video autoplay="autoplay" loop="loop" width="1024" height="480">
+<video autoplay="autoplay" loop="loop" width="1024" height="480" controls>
   <source src="/assets/images/multigrid/jacobi.mp4" type="video/mp4">
 </video>
 
@@ -134,13 +134,13 @@ Things get [a little more complicated](#appendix-dirichlet-boundary-conditions) 
 
 Going back to ($\ref{eq:ref4}$) you can see that at each iteration, the value of $v_i$ is only affected by neighboring points. It therefore takes a lot of iterations - $n$ iterations for a grid of $n$ points - for values of $v$ on one end of the lattice to have any effect on the other end. This makes the Jacobi method great for relaxing initial guesses like this:
 
-<video autoplay="autoplay" loop="loop" width="1024" height="480">
+<video autoplay="autoplay" loop="loop" width="1024" height="480" controls>
   <source src="/assets/images/multigrid/jacobi_highfreq.mp4" type="video/mp4">
 </video>
 
 See how quickly it suppresses the high frequency components of the initial guess? After only a few iterations $v$ is relaxed into a more sensible form, but it takes a _lot_ more iterations to actually get it close to the real solution. On the other hand, it's terrible for intial guesses like this:
 
-<video autoplay="autoplay" loop="loop" width="1024" height="480">
+<video autoplay="autoplay" loop="loop" width="1024" height="480" controls>
   <source src="/assets/images/multigrid/jacobi_lowfreq.mp4" type="video/mp4">
 </video>
 
