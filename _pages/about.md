@@ -11,4 +11,4 @@ My name is Peyton Murray. I'm a postdoctoral researcher at the University of Tam
 
 [research]: /research/
 [coding]: /coding/
-[CV]: /assets/CV_Peyton_Murray.pdf
+[CV]: https://github.com/peytondmurray/CV/raw/master/CV_Peyton_Murray.pdf
