@@ -68,6 +68,89 @@ $$
 
 # Implementation
 
+I started out by writing Go functions to allow the Mumax simulator to export the location of all the simulation cells. The resulting `cellLocs.csv` file has the indices and location of each cell:
+
+```
+#ix,iy,iz,x,y,z
+0,0,0,5.000000E-10,5.000000E-10,5.000000E-10
+1,0,0,1.500000E-09,5.000000E-10,5.000000E-10
+2,0,0,2.500000E-09,5.000000E-10,5.000000E-10
+3,0,0,3.500000E-09,5.000000E-10,5.000000E-10
+4,0,0,4.500000E-09,5.000000E-10,5.000000E-10
+⋮
+```
+
+and a little more Go code to write a .csv file at every time step of the simulation. The resulting files looked like this:
+
+```
+#time = 7.950000E-09
+#ix,iy,iz,kx,ky,kz,angle
+0,0,0,7.121113E-01,-7.020666E-01,0.000000E+00,4.882812E-04
+1,0,0,7.076833E-01,-7.065297E-01,0.000000E+00,4.882812E-04
+2,0,0,7.037417E-01,-7.104561E-01,0.000000E+00,4.882812E-04
+3,0,0,7.011437E-01,-7.130199E-01,0.000000E+00,4.882812E-04
+4,0,0,6.999333E-01,-7.142082E-01,0.000000E+00,4.882812E-04
+5,0,0,7.000152E-01,-7.141279E-01,0.000000E+00,4.882812E-04
+⋮
+```
+
+At the top, there's a header showing the current simulation time and the column names. `(ix, iy, iz)` are the (x, y, z) indices of each simulation cell; `(kx, ky, kz)` is the rotation axis vector $\textbf{k}$; and `angle` is $\theta$. From here, I wrote some Python functions which called the Blender API to import this data into Blender. First, some code to read in locations of each cell.
+
+{% highlight python %}
+import bpy
+
+scaling = 5e8
+step = 39
+radius = .3
+length = .3
+vertices = 32
+time_dilation_factor = 1 # Must be int
+
+# Read the location of simulation cells from cellLocs.csv
+with open(datadir + 'cellLocs.csv', 'r') as f:
+    line = f.readlines()
+
+# Ignore comment lines at the top of the file
+i_start = 0
+while lines[i_start][0] == '#':
+    i_start += 1
+
+# Extract the location of each cell
+x, y, z = [], [], []                # Cell locations
+ix, iy, iz = [], [], []             # Cell indices
+for line in lines[i_start::step]:
+    s = line.split(',')
+    ix.append(int(s[0]))
+    iy.append(int(s[1]))
+    iz.append(int(s[2]))
+    x.append(float(s[3])*scaling)
+    y.append(float(s[4])*scaling)
+    z.append(float(s[5])*scaling)
+
+# Generate a new cone mesh.
+bpy.ops.mesh.primitive_cone_add(vertices=vertices,radius1=radius,radius2=0.0,depth=length,location=(0, 0, 0))
+master_cone = bpy.context.active_object
+master_cone.rotation_mode = 'AXIS_ANGLE'
+scene = bpy.context.scene
+
+# Make a new cone object for each location. The name of the cones should include the indices, i.e., Cone(ix,iy,iz).
+for i, _ix, _iy, _iz, _x, _y, _z in tqdm.tqdm(list(zip(range(len(ix)), ix, iy, iz, x, y, z)), desc='Generating cones...'):
+    object = master_cone.copy()
+    object.data = master_cone.data.copy()
+    object.location = (_x, _y, _z)
+    object.name = f'Cone({_ix},{_iy},{_iz})'
+    new_mat = bpy.data.materials.new(name=f'Cone({_ix},{_iy},{_iz})')
+    new_mat.use_nodes = True
+    object.data.materials.append(new_mat)
+    scene.collection.objects.link(object)
+{% endhighlight %}
+
+Because Blender comes packaged with its own version of Python, and it doesn't include most of the [scientific python stack][python]. So instead of reading the cell locations using Pandas as I otherwise would, I had to read them in using pure python. In the Mumax simulations, the cell locations are typically spaced $∼ 10^{-9}$ m apart; Blender doesn't work well with objects this small, so I multiplied the cell locations by a `scaling` factor to make them a more reasonable size.
+
+
+
+
+
 # Making it fancy
 
 <video autoplay="autoplay" loop="loop" width="800" height="450" codecs="h264" controls>
@@ -88,3 +171,4 @@ $$
 [mumax]: https://mumax.github.io/
 [llg]: https://en.wikipedia.org/wiki/Landau%E2%80%93Lifshitz%E2%80%93Gilbert_equation
 [rodrigues]: https://en.wikipedia.org/wiki/Rodrigues'_rotation_formula
+[python]: https://www.scipy.org/index.html
