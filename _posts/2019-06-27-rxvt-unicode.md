@@ -13,7 +13,7 @@ I really like rxvt-unicode (often called urxvt) as a terminal emulator. I can cu
 
 # Enable unicode input with `Ctrl+Shift+u`
 
-For anyone who doesn't use unicode symbols very often, a lot of Linux software accepts [unicode input][unicode] input sequences. Usually, you press `Ctrl+Shift+u`, followed by the unicode sequence, then `Enter`. It hasn't been until relatively recently that I've found use for unicode, but I've found that a lot of things, and especially math, can be more clearly and concisely expressed with symbols than with whole words. Consider this example, which converts spherical coordinates to cartesian, making use of θ and ϕ:
+For anyone who doesn't use unicode symbols very often, a lot of Linux software accepts [unicode input][unicode] input sequences. Usually, you press `Ctrl+Shift+u`, followed by the unicode sequence, then `Enter`. It hasn't been until relatively recently that I've found use for unicode, but I've found that a lot of things, and especially math, can be more clearly and concisely expressed with symbols than with whole words. Consider this Python example, which converts spherical coordinates to cartesian, making use of θ and ϕ:
 
 {% highlight python %}
 import numpy as np
@@ -24,16 +24,16 @@ def spherical(r, ϕ, θ):
     return (x, y, z)
 {% endhighlight %}
 
-The language is so much more expressive when you use all the symbols available to you! Anyway, by default urxvt allows you to enter unicode symbols by pressing `Ctrl+Shift+<unicode sequence>`, which is different than usual (I don't want to memorize another key combination if there's no good reason to) and annoying, as it doesn't leave both hands free to type the `<unicode sequence>`. Fortunately, [Jeff Epler][post] wrote a [nice little script][script] to enable the usual unicode shortcut. To install it:
+The language is so much more expressive when you use all the symbols available to you! Anyway, by default urxvt allows you to enter unicode symbols by pressing `Ctrl+Shift+<unicode sequence>`, which is both different than usual (I don't want to memorize another key combination if there's no good reason to) and annoying, as it doesn't leave both hands free to type the `<unicode sequence>`. Fortunately, [Jeff Epler][post] wrote a [nice little script][script] to enable the usual unicode shortcut. To install it:
 
 1. Copy the script to `~/.urxvt/ext/unichr`, making a directory if necessary
 2. The script needs to be enabled in urxvt, and the default unicode input sequence ("ISO 14755 mode") needs to be disabled. Edit your `~/.Xresources`, adding the following lines:
 
-```
-URxvt.iso14755:					  false
-URxvt.iso14755_52:	        		  false
-URxvt.perl-ext:					  unichr
-```
+    ```
+    URxvt.iso14755:         false
+    URxvt.iso14755_52:      false
+    URxvt.perl-ext:         unichr
+    ```
 
 3. Enable the new settings by doing `xrdb ~/.Xresources`
 
