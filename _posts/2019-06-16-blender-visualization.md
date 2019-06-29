@@ -80,7 +80,7 @@ I started out by writing Go functions to allow the Mumax simulator to export the
 ⋮
 ```
 
-and a little more Go code to write a .csv file at every time step of the simulation. The resulting files looked like this:
+I also wrote Go functions to write a .csv file at every time step of the simulation. The resulting files looked like this:
 
 ```
 #time = 7.950000E-09
@@ -94,13 +94,14 @@ and a little more Go code to write a .csv file at every time step of the simulat
 ⋮
 ```
 
-At the top, there's a header showing the current simulation time and the column names. `(ix, iy, iz)` are the (x, y, z) indices of each simulation cell; `(kx, ky, kz)` is the rotation axis vector $\textbf{k}$; and `angle` is $\theta$. From here, I wrote some Python functions which called the Blender API to import this data into Blender. First, some code to read in locations of each cell.
+At the top, there's a header showing the current simulation time and the column names. `(ix, iy, iz)` are the (x, y, z) indices of each simulation cell; `(kx, ky, kz)` is the rotation axis vector $\textbf{k}$; and `angle` is $\theta$. Finally, I also configured Mumax to write the magnetization (mx, my, mz) at each cell location as a numpy `.npy` array file at each timestep - I'll use this data later on to add color to the final renders. From here, I wrote some Python functions which called the Blender API to import this data into Blender. First, some code to read in locations of each cell.
 
 {% highlight python %}
 import bpy
+import numpy as np
 
 scaling = 5e8
-step = 39
+step = 39       # Only show every 39th cone; this can be lowered depending on computer resources
 radius = .3
 length = .3
 vertices = 32
@@ -126,15 +127,19 @@ for line in lines[i_start::step]:
     x.append(float(s[3])*scaling)
     y.append(float(s[4])*scaling)
     z.append(float(s[5])*scaling)
+{% endhighlight %}
 
-# Generate a new cone mesh.
+Because Blender comes packaged with its own version of Python, it doesn't include most of the [scientific python stack][python] (except for numpy). So instead of reading the cell locations using Pandas as we otherwise would, we have to read them in using pure python. In the Mumax simulations, the cell locations are typically spaced $∼ 10^{-9}$ m apart; Blender doesn't work well with objects this small, so it's a good idea to multiply the cell locations by a `scaling` factor to make them a more reasonable size. Next we will generate and modify a single "master" cone mesh with custom properties before copying it to each simulation cell location.
+
+{% highlight python %}
+# Generate a master cone. Set the rotation mode to 'AXIS_ANGLE'
 bpy.ops.mesh.primitive_cone_add(vertices=vertices,radius1=radius,radius2=0.0,depth=length,location=(0, 0, 0))
 master_cone = bpy.context.active_object
 master_cone.rotation_mode = 'AXIS_ANGLE'
 scene = bpy.context.scene
 
-# Make a new cone object for each location. The name of the cones should include the indices, i.e., Cone(ix,iy,iz).
-for i, _ix, _iy, _iz, _x, _y, _z in tqdm.tqdm(list(zip(range(len(ix)), ix, iy, iz, x, y, z)), desc='Generating cones...'):
+# Make a new cone object for each location. The name of the cones should include the indices, i.e., Cone(ix,iy,iz)
+for i, _ix, _iy, _iz, _x, _y, _z in list(zip(range(len(ix)), ix, iy, iz, x, y, z)):
     object = master_cone.copy()
     object.data = master_cone.data.copy()
     object.location = (_x, _y, _z)
@@ -143,26 +148,86 @@ for i, _ix, _iy, _iz, _x, _y, _z in tqdm.tqdm(list(zip(range(len(ix)), ix, iy, i
     new_mat.use_nodes = True
     object.data.materials.append(new_mat)
     scene.collection.objects.link(object)
+
+bpy.data.objects.remove(master_cone)
+
 {% endhighlight %}
 
-Because Blender comes packaged with its own version of Python, and it doesn't include most of the [scientific python stack][python]. So instead of reading the cell locations using Pandas as I otherwise would, I had to read them in using pure python. In the Mumax simulations, the cell locations are typically spaced $∼ 10^{-9}$ m apart; Blender doesn't work well with objects this small, so I multiplied the cell locations by a `scaling` factor to make them a more reasonable size.
+We also create a new material each time a cone is generated, so that we can add color and other effects later on
 
+{% highlight python %}
+# Rotate and keyframe for each Rodrigues file
+for i in range(nframes):
 
+    # Read the rotation axes and angles k and θ for each timestep
+    with open(root + datadir + f'rodrigues{i:06d}.csv', 'r') as f:
+        lines = f.readlines()
 
+    i_start = 0
+    while lines[i_start][0] == '#':
+        i_start += 1
 
+    axes = []
+    angles = []
+    ix, iy, iz = [], [], []
+    for line in lines[i_start::step]:
+        s = line.split(',')
+        ix.append(int(s[0]))
+        iy.append(int(s[1]))
+        iz.append(int(s[2]))
+        axes.append([float(s[3]), float(s[4]), float(s[5])])
+        angles.append(float(s[6]))
 
-# Making it fancy
+    # Load in the magnetization data as a numpy array
+    m = np.load(root + datadir + f'm{i:06d}.npy')
+
+    # Set the rotation axis and angle at each cell location. Keyframe the angles and the material color
+    for _ix, _iy, _iz, axis, angle in list(zip(ix, iy, iz, axes, angles)):
+
+        # We will color the cones by the z-component of the magnetization at each timestep
+        mz = m[_iz, _iy, _ix, 2]
+        color = colors[int((len(colors)-1)*(1-mz)/2)]
+
+        # Rotate, color, and keyframe each cone
+        object = bpy.data.objects[f'Cone({_ix},{_iy},{_iz})']
+        object.rotation_axis_angle = [angle, axis[0], axis[1], axis[2]]
+        bpy.data.materials[f'Cone({_ix},{_iy},{_iz})'].node_tree.nodes[1].inputs[0].default_value = [color[0], color[1], color[2], 1]
+        bpy.data.materials[f'Cone({_ix},{_iy},{_iz})'].node_tree.nodes[1].inputs[0].keyframe_insert(data_path='default_value', frame=i*time_dilation_factor)
+        object.keyframe_insert(data_path='rotation_axis_angle', frame=i*time_dilation_factor)
+{% endhighlight %}
+
+Here, colors is simply a list of RGBA tuples; for me, these were taken from the matplotlib `RdBu_r` colormap. After running this script, the Blender interface should look like this:
+
+<figure style="width: 900px" class="align-center">
+  <img src="/assets/images/science_to_blender/after_loading_data.png" alt="">
+  <figcaption>Feels good to be right all the time.</figcaption>
+</figure>
+
+Now all that remains is to add lighting and cameras, and then render whatever animations or images we need.
+
+# Results
+
+After spending more time than I'd like to admit keyframing camera motion and adding lighting, I was able to make an animation that I'm happy with. After rendering the animation using the fast Eevee render engine, I found that the animation was slower than I wanted it to be, but this was easily fixed by increasing the frame rate with FFMPEG. This animation shows how the domain wall propagates under the external magnetic field, and I think it captures its chaotic motion really well:
 
 <video autoplay="autoplay" loop="loop" width="800" height="450" codecs="h264" controls>
   <source src="/assets/images/science_to_blender/dw_eyecandy.mp4" type="video/mp4">
 </video>
 
+The z-component of the magnetization is used to color the cones: when the cone points up the color is red, and when it points down the color is blue. I also rendered a different pair of images of the domain wall which I used in a previous post as well:
+
+<figure class="half">
+    <a href="/assets/images/paraview_blender/down_the_wall.jpg"><img src="/assets/images/paraview_blender/down_the_wall.jpg"></a>
+    <a href="/assets/images/paraview_blender/wall_night.jpg"><img src="/assets/images/paraview_blender/wall_night.jpg"></a>
+    <figcaption>The lighting and depth of field make these images so much more interesting.</figcaption>
+</figure>
+
+The time I spent learning to use Blender's Python API has really been worth it, and I think it will be useful for creating professional level data visualizations in the future. Bridging the gap from the Mumax micromagnetics simulator using a combination of custom Go functions and Python scripting took a significant investment of time and effort, but ultimately the payoff can be worth it.
+
+
 [^1]: While you can actually split this single mesh into a bunch of separate objects in Blender, this still doesn't really solve the problem. For example, suppose I have some object in Paraview which moves as a function of time, and I want to make a movie of it in Blender. I can try to export my data in Paraview as a set of PLY files (`frame1.ply, frame2.ply, frame3.ply, ...`), like images from a flip-book. But there is still no way to tell Blender that the object I import from `frame1.ply` is the same object as in `frame2.ply`, shown at a different time. As far as Blender is concerned these are compeletely different objects, so Blender's most powerful animation features - specifically, keyframing the motion of objects - just won't work here.
 
 [^2]: After posting this, I've discovered that you *can* in fact align objects to a vector using the mathutils.to_track_quat() function. Maybe I'll make another post about this later.
 
-[magnet]: /assets/images/science_to_blender/magnet.svg
-{: .align-center}
 
 [blender]: www.blender.org
 [jdh]: https://matplotlib.org/
