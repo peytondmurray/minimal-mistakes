@@ -43,19 +43,22 @@ Here, `<OUTPUT>` is the name of the display you are using; you can see the conne
 Now we just need to put it all together into a bash script:
 
 {% highlight shell %}
-BRIGHTNESS=`xrandr --verbose | grep -m 1 -i brightness | cut -f2 -d ' '`
+ACTIVEDISPLAYES=$(xrandr | grep -i " connected" | cut -f1 -d ' ')
+BRIGHTNESS=$(xrandr --verbose | grep -m 1 -i brightness | cut -f2 -d ' ')
 NIGHTVALUE=0.6
 DAYVALUE=1.0
 
-if [ `echo "$BRIGHTNESS == 1.0" | bc` -eq 1 ]
+if [ $(echo "${BRIGHTNESS} == 1.0" | bc) -eq 1 ]
 then
-        SETVALUE=$NIGHTVALUE
+        SETVALUE=${NIGHTVALUE}
 else
-        SETVALUE=$DAYVALUE
+        SETVALUE=${DAYVALUE}
 fi
 
-xrandr --output DVI-D-0 --brightness $SETVALUE
-xrandr --output DP-1 --brightness $SETVALUE
+# iterate through all the screens
+for DISP_i in ${ACTIVEDISPLAYES}; do
+        xrandr --output "${DISP_i}" --brightness ${SETVALUE}
+done
 {% endhighlight %}
 
 If the brightess is 1.0, this script sets it to 0.6; if it is anything but 1.0, it sets the brightness to 1.0. The only hiccup was that bash can't make floating point comparisons - so the value of the brightness I got from `xrandr` couldn't be directly evaluated. Instead, you have to use `bc`, which is made for this purpose. You can read up on the syntax for `bc`, but its use in the if statement here is clear.
