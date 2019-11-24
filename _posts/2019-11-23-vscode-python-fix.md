@@ -6,7 +6,7 @@ read_time: true
 share: true
 date: '2019-11-22 14:30:00 -0800'
 categories: coding
-toc: true
+toc: false
 ---
 
 [vscode](https://code.visualstudio.com) is my favorite IDE, but for as long as I can remember, the python extension has
