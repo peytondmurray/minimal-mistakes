@@ -27,7 +27,6 @@ LD_LIBRARY_PATH=$LD_LIBRARY_PATH:<python install dir>/lib # Only needed if you b
 <path to vscode> --disable-gpu $@
 ```
 
-
 That's it. I haven't tested this with virtual environments, but presumably it would work the same way. After launching
 vscode from the terminal once, it seems to recognize the same interpreter in subsequent launches, even if they are not
 launched from the terminal. Hope this helps!
