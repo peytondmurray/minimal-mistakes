@@ -18,8 +18,15 @@ interpreter I want it to. And despite the massive number of stackoverflow and gi
 been able to find anything that has helped (and it's clearly an issue which has persisted for years at this point).
 Anyway, here's my solution:
 
-1. Add \<python install dir\>/bin/ to your PATH
-2. Run vscode from the terminal
+1. Make a bash script: `/usr/bin/vscode`, `/usr/local/bin/vscode`, or wherever you want to launch it from. I launch everything from `dmenu`, so either place would work:
+
+```bash
+#!/bin/bash
+PATH=$PATH:<python install dir>/bin
+LD_LIBRARY_PATH=$LD_LIBRARY_PATH:<python install dir>/lib # Only needed if you built python to use shared libraries
+<path to vscode> --disable-gpu $@
+```
+
 
 That's it. I haven't tested this with virtual environments, but presumably it would work the same way. After launching
 vscode from the terminal once, it seems to recognize the same interpreter in subsequent launches, even if they are not
