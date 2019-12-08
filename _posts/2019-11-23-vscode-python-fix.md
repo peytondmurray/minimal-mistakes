@@ -17,7 +17,8 @@ install vscode on a new computer or vm, I have to waste time trying to figure ou
 interpreter I want it to. And despite the massive number of stackoverflow and github issues about this, I've never
 been able to find anything that has helped (and it's clearly an issue which has persisted for years at this point).
 
-Anyway, I have a solution; it's important to note that my python was build with `--enable-shared`, so YMMV.
+Anyway, I have a solution; it's important to note that my python was build with `--enable-shared`, so I also needed to
+ update the system shared libraries, so YMMV.
 
 1. Make a bash script to disable gpu, which causes problems on linux as far as I'm aware: `/usr/bin/vscode`, `/usr/local/bin/vscode`, or wherever you want to launch it from. I launch everything from `dmenu`, so either place would work:
 
