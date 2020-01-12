@@ -5,7 +5,7 @@ title: "About"
 #toc: true
 ---
 
-My name is Peyton Murray. I'm a postdoctoral researcher at the University of Tampere working on computational methods for understanding nanoscale magnetism. I spend a lot of time working on my [research][research], but in my free time I like to write [software][coding] for science.
+My name is Peyton Murray. I'm a programmer at [Voltaiq][voltaiq]. Before I was a programmer, I was a researcher [studying][research] nanoscale magnetism at UC Davis and Tampere University. In my free time I like to write [software][coding] for science, and am an active contributor to several open source projects.
 
 [Here's my CV.][CV] If two pages is too long, [here's a one page version.][CV_short]
 
@@ -13,3 +13,4 @@ My name is Peyton Murray. I'm a postdoctoral researcher at the University of Tam
 [coding]: /coding/
 [CV]: https://github.com/peytondmurray/CV/raw/master/peyton_murray_cv.pdf
 [CV_short]: https://github.com/peytondmurray/CV/raw/master/peyton_murray_cv_short.pdf
+[voltaiq]: https://voltaiq.com
