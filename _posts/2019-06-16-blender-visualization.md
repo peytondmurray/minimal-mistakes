@@ -200,7 +200,6 @@ Here, colors is simply a list of RGBA tuples; for me, these were taken from the 
 
 <figure style="width: 900px" class="align-center">
   <img src="/assets/images/science_to_blender/after_loading_data.png" alt="">
-  <figcaption>Feels good to be right all the time.</figcaption>
 </figure>
 
 Now all that remains is to add lighting and cameras, and then render whatever animations or images we need.
