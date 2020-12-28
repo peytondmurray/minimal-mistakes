@@ -14,10 +14,10 @@ toc: true
 About a year ago, I was working on a for-fun problem where I needed to determine the voltage from an arbitrary charge distribution along 1 dimension. This is the problem of solving a linear differential equation (in this case Poisson's equation) given a driving function $f$:
 
 $$
-\begin{align}
+\begin{aligned}
 -\nabla^2 v = f
-\label{eq:poisson}
-\end{align}
+\tag{\htmlId{poisson}{1}}
+\end{aligned}
 $$
 
 Unless we're involved in developing numerical libraries, it's not too often that we think about how these problems can be solved numerically. The fact there aren't very many blog posts about this kind of stuff shows how infrequently we think about these sorts of algorithms, so I wanted to give it a shot.
@@ -30,13 +30,12 @@ I have a grid of equally spaced points with a charge distribution $\rho$ defined
 
 ![problem_layout]{:class="img-responsive"}
 
-and so on. The goal is to find the voltage $v$ everywhere, where the voltage is determined by Poisson's equation ($\ref{eq:poisson}$). In the context of electromagnetism (where it's often encountered) it is written
+and so on. The goal is to find the voltage $v$ everywhere, where the voltage is determined by Poisson's equation ($\href{#poisson}{1}$). In the context of electromagnetism (where it's often encountered) it is written
 
 $$
-\begin{align}
+\begin{aligned}
 -\nabla^2 v = \frac{\rho}{\epsilon}.
-\label{eq:ref1}
-\end{align}
+\end{aligned}
 $$
 
 Since we're interested in solving for the value of $v$ on a set of discrete points, the first step in tackling the problem is to change the laplacian, which acts on a _continuous_ scalar field, into a _discrete_ operator. Using the central finite differences scheme, a derivative can be approximated by
@@ -54,16 +53,16 @@ $$
 Since it's annoying to write $v(x+\Delta x)$ everywhere, I'm just going to use $v_i$ for the value of the voltage at $x_i$, which means that $v(x+\Delta x) \rightarrow v_{i+1}$, etc. Now the LHS of $(\ref{eq:ref1})$ is just
 
 $$
-\begin{align}
+\begin{aligned}
 -\nabla^2 v \,\,\rightarrow\,\, & \frac{-v_{i+1} + 2v_i - v_{i-1}}{\Delta x^2}, \,\,\,\, 1 \le i \le n-1 \\
 & v_0 = v_n = 0
-\end{align}
+\end{aligned}
 $$
 
 Rewriting this in terms of matrices allows us to reduce the amount of notation even further, making $(\ref{eq:ref1})$:
 
 $$
-\begin{align}
+\begin{aligned}
 \begin{pmatrix}
 2 & -1 & \, & \, & \, & \, \\
 -1 & 2 & -1 & \, & \, & \, \\
@@ -72,16 +71,15 @@ $$
 \end{pmatrix}
 \begin{pmatrix} v_1 \\ v_2 \\ \vdots \\ v_{n-1} \end{pmatrix}
  &= \begin{pmatrix} f_1 \\ f_2 \\ \vdots \\ f_{n-1} \end{pmatrix}
-\end{align}
+\end{aligned}
 $$
 
 or more concisely,
 
 $$
-\begin{align}
+\begin{aligned}
 Av = f
-\label{eq:ref2}
-\end{align}
+\end{aligned}
 $$
 
 where $A$ is the (negative) discretized laplacian we found above and $f\equiv \rho \Delta x^2 / \epsilon$. Of course, ($\ref{eq:ref2}$) can be solved by inverting $A$, i.e. $v = A^{-1}f$, but in general we are talking about problems large enough that directly computing $A^{-1}$ is impractical (or at least really inefficient). This turns out to be the case even for very small systems.
@@ -97,21 +95,19 @@ $$
 Then, $Av=f$ becomes
 
 $$
-\begin{align}
+\begin{aligned}
 (D-Q)v &= f \\
 Dv &= Qv + f\\
 v &= D^{-1}Qv + D^{-1}f
-\label{eq:ref3}
-\end{align}
+\end{aligned}
 $$
 
 We start by making an initial guess $V^0_i$ at the solution, then plugging this into the right hand side to get the first iterative improvement $v^1_i$. The result is then plugged back in to the right hand side, and so on, to improve the solution iteratively. Notice that the improved solution $v^1_i$ is found from the values of the neighboring points at the last iteration:
 
 $$
-\begin{align}
+\begin{aligned}
 v^1_i = D^{-1}Qv^0_i + D^{-1}f = \frac{1}{2}(v^0_{i-1} + v^0_{i+1} + f_i)
-\label{eq:ref4}
-\end{align}
+\end{aligned}
 $$
 
 This is pretty good, because now the problem is just turning the crank as fast as the computer will go. But there's actually a neat trick which will speed up how fast this solution converges: instead of using the RHS of ($\ref{eq:ref3}$) as the improved solution, we can treat it as an intermediate value: $v^* = D^{-1}Qv^0_i + D^{-1}f$. We then mix $v^*$ with part of the original solution to get the next iteration,
@@ -197,7 +193,7 @@ $$
 The prolongation and restriction operations can be represented as matrices:
 
 $$
-\begin{align*}
+\begin{aligned}
 I_{h\rightarrow 2h} &=
 \frac{1}{2}
 \begin{pmatrix}
@@ -218,17 +214,17 @@ I_{2h\rightarrow h} &=
 \, & \, & \, & 1 & \\
 \, & \, & \, & 0.5 \\
 \end{pmatrix} & \text{(Prolongation)}
-\end{align*}
+\end{aligned}
 $$
 
 You can see that the prolongation and restriction operators are related by $I_{h\rightarrow 2h} = 0.5I_{2h\rightarrow h}^T$, which makes computing them simple. Now moving between coarse and fine grids is easy:
 
 $$
-\begin{align*}
+\begin{aligned}
 v_{2h} &= I_{h\rightarrow 2h}v_h \\
 f_{2h} &= I_{h\rightarrow 2h}f_h \\
 A_{2h} &= I_{h\rightarrow 2h} A_h I_{2h\rightarrow h}
-\end{align*}
+\end{aligned}
 $$
 
 # How much faster is multigrid?
@@ -246,10 +242,10 @@ I'd like to write more about some of the algorithms hidden in the software we re
 To include the effects of fixed voltage at the boundary points $v_0$ and $v_n$ into $(\ref{eq:ref2})$, we only need to write down the discrete Poisson's equation at the points _adjacent_ to the edge:
 
 $$
-\begin{align}
+\begin{aligned}
 v_0 - 2v_1 + v_2 = f_1 \,\,\,\, &\rightarrow \,\,\,\, f_1 - v_0 = 2v_1 + v_2 \\
 v_{n-2} - 2v_{n-1} + v_n = f_{n-1} \,\,\,\, &\rightarrow \,\,\,\, f_{n-1} - v_{n} = v_{n-2} - 2v_{n-1}
-\end{align}
+\end{aligned}
 $$
 
 This means that you can use the $A$, $I_{h2h}$, and $I_{2hh}$ operators and all of the associated machinery above with only a slight modification to the $f$-vector:
